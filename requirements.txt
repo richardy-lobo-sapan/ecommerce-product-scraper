@@ -1,0 +1,5 @@
+# requirements.txt — Shopee Product Scraper
+# Install with: pip install -r requirements.txt
+
+requests>=2.31.0   # HTTP client with session + retry support
+urllib3>=2.0.0     # Underlying transport; Retry class lives here
