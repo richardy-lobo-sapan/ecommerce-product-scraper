@@ -1,4 +1,4 @@
-# Shopee Indonesia Product Scraper
+# Section 3 — Shopee Indonesia Product Scraper
 
 A Python scraper that collects product listings from [Shopee Indonesia](https://shopee.co.id) and exports them to `result.csv` and `result.json`.
 
