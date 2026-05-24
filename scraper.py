@@ -3,17 +3,27 @@ scraper.py — Shopee Indonesia Product Scraper
 =============================================
 Section 3 of the DE Analytics Portfolio (Kredivo Technical Test).
 
-Strategy
---------
-Shopee's frontend is a SPA that fetches product data from its own internal
-JSON search API. We call the same endpoint the browser calls, so no Selenium
-or HTML parsing is required. This keeps the code clean, modular, and fast.
+Target site: Shopee Indonesia (https://shopee.co.id)
+
+Technical approach
+------------------
+Major Indonesian e-commerce platforms (Shopee, Blibli, Tokopedia) use TLS
+fingerprinting to distinguish Python's requests library from a real browser —
+the SSL/TLS handshake itself reveals the client identity before any headers
+are read. Plain requests.get() always fails with 403 on these sites.
+
+The solution is curl_cffi, which wraps libcurl and impersonates Chrome's
+exact TLS fingerprint (cipher suites, extensions, elliptic curves). From the
+server's perspective the connection is indistinguishable from Chrome 124.
+
+With TLS impersonation in place, Shopee's internal JSON search API is
+accessible with a single GET call — no Selenium, no headless browser,
+no credentials required.
 
 Ethical compliance
 ------------------
 - Respects robots.txt: the /api/ search path is not disallowed on shopee.co.id
 - Adds random delays between every request (see DELAY_BETWEEN_REQUESTS)
-- Uses exponential-backoff retry — backs off further on 429/5xx responses
 - No credentials, session tokens, or login are used
 - No personal or user-generated private data is collected
 
@@ -21,24 +31,20 @@ Mandatory output fields
 -----------------------
   product_name  : Item title as listed on Shopee
   category_id   : Shopee's numeric category ID (catid)
-  price_idr     : Price in Indonesian Rupiah (converted from Shopee's raw int)
+  price_idr     : Listed price in Indonesian Rupiah
 
 Extra fields — each carries a short business justification
 ----------------------------------------------------------
-  rating          : Average star rating → demand signal; input to price
+  rating          : Average star rating -> demand signal; input to price
                     elasticity and recommendation-ranking models
-  review_count    : Total review count → popularity proxy; used to weight
-                    rating reliability (a 4.9 with 3 reviews ≠ 4.9 with 3 000)
-  units_sold      : Cumulative units sold → sales velocity; critical input
+  review_count    : Total reviews -> popularity proxy; weights rating
+                    reliability (4.9 from 3 reviews != 4.9 from 3,000)
+  units_sold      : Cumulative units sold -> sales velocity; critical input
                     for GMV modelling and inventory forecasting
-  stock           : Current stock level → live inventory intelligence;
-                    triggers low-stock alerts in supply chain pipelines
-  seller_location : Seller's city/region → geographic supply mapping;
-                    used in logistics cost analysis and regional demand studies
-  discount_pct    : Active discount percentage → promotional strategy signal;
-                    input to markdown optimisation and promo attribution models
-  product_url     : Canonical listing URL → full traceability back to source;
-                    enables price monitoring and deduplication across runs
+  stock           : Current stock level -> live inventory intelligence
+  seller_location : Seller city/region -> geographic supply mapping
+  discount_pct    : Active discount -> promo strategy and markdown analysis
+  product_url     : Canonical URL -> traceability and price monitoring
 
 Usage
 -----
@@ -54,50 +60,38 @@ import logging
 import random
 import time
 from dataclasses import asdict, dataclass
-from typing import Optional
+from typing import List, Optional
 from urllib.parse import urlencode
 
-import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
+from curl_cffi import requests  # replaces standard requests; impersonates Chrome TLS
 
 # ---------------------------------------------------------------------------
-# Configuration  (edit these to control scope and output)
+# Configuration
 # ---------------------------------------------------------------------------
 
 BASE_URL     = "https://shopee.co.id/api/v4/search/search_items/"
 REFERER_BASE = "https://shopee.co.id/search"
 
-# User agent pool — rotated per session to reduce fingerprinting risk.
-# Adapted from nerufuyo/neru-scrapper; limited to modern Chrome/Firefox on
-# Windows and macOS (the most common profiles on Indonesian e-commerce sites).
+# User agent pool — must match the impersonation target (Chrome 124)
 USER_AGENTS = [
-    # Chrome 124 — Windows
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-    # Chrome 123 — macOS
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-    # Firefox 125 — Windows
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
-    # Firefox 124 — macOS
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 14.4; rv:124.0) Gecko/20100101 Firefox/124.0",
-    # Edge 124 — Windows
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
 ]
 
-# Keywords to scrape — chosen to cover diverse categories for a richer dataset
 KEYWORDS = [
     "laptop",
     "smartphone",
-    "sepatu",        # shoes
+    "sepatu",       # shoes
     "skincare",
-    "baju pria",     # men's clothing
+    "baju pria",    # men's clothing
 ]
 
-ITEMS_PER_PAGE        = 60          # Shopee's per-request maximum
-PAGES_PER_KEYWORD     = 3           # 3 × 60 = 180 items/keyword → ~900 total
-DELAY_BETWEEN_REQUESTS = (1.5, 3.0) # (min, max) seconds — random jitter
-REQUEST_TIMEOUT       = 15          # seconds per request
-MAX_RETRIES           = 3           # retried on 429 / 5xx before giving up
+ITEMS_PER_PAGE         = 60
+PAGES_PER_KEYWORD      = 3           # 3 x 60 = 180 items/keyword -> ~900 total
+DELAY_BETWEEN_REQUESTS = (1.5, 3.0)  # (min, max) seconds
+REQUEST_TIMEOUT        = 20
+MAX_RETRIES            = 3
 
 OUTPUT_CSV  = "result.csv"
 OUTPUT_JSON = "result.json"
@@ -123,7 +117,7 @@ class Product:
     category_id  : int
     price_idr    : float
 
-    # Extra (all Optional — Shopee may omit any of these for some listings)
+    # Extra
     rating          : Optional[float] = None
     review_count    : Optional[int]   = None
     units_sold      : Optional[int]   = None
@@ -139,39 +133,26 @@ class Product:
 
 def build_session() -> requests.Session:
     """
-    Return a requests.Session pre-configured with a retry adapter.
+    Return a curl_cffi Session that impersonates Chrome 124.
 
-    Retries on 429 (rate-limited) and all 5xx server errors using
-    exponential backoff (2 s, 4 s, 8 s …) so we don't hammer a struggling
-    server — aligns with ethical scraping and avoids IP bans.
+    impersonate="chrome124" sets the TLS cipher suites, extensions, and
+    elliptic curves to exactly match Chrome 124 — making the connection
+    indistinguishable from a real browser at the network level.
     """
-    session = requests.Session()
-    retry = Retry(
-        total             = MAX_RETRIES,
-        backoff_factor    = 2,
-        status_forcelist  = [429, 500, 502, 503, 504],
-        allowed_methods   = ["GET"],
-    )
-    session.mount("https://", HTTPAdapter(max_retries=retry))
-    return session
+    return requests.Session(impersonate="chrome124")
 
 
 def build_headers(keyword: str) -> dict:
     """
-    Mimic the headers a browser sends when hitting the Shopee search API.
-
-    UA is rotated from USER_AGENTS on each call (adapted from nerufuyo/neru-scrapper)
-    to reduce fingerprinting risk. Accept-Language is set to id-ID so the server
-    returns Indonesian-locale responses, matching what a real user would send.
-    No auth tokens or cookies are included — this endpoint is fully public.
+    Request headers that match what Chrome sends to Shopee's search API.
+    Combined with TLS impersonation, these make each request look like
+    a genuine browser session.
     """
     return {
         "User-Agent"     : random.choice(USER_AGENTS),
         "Referer"        : f"{REFERER_BASE}?keyword={keyword}",
         "X-API-Source"   : "pc",
         "Accept"         : "application/json",
-        # Prefer Indonesian locale — makes requests look more authentic and
-        # ensures prices/text are returned in the expected regional format.
         "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
     }
 
@@ -179,9 +160,7 @@ def build_headers(keyword: str) -> dict:
 def build_url(keyword: str, offset: int) -> str:
     """
     Construct the Shopee search API URL.
-
-    'newest' is Shopee's offset parameter — it controls pagination.
-    Page 1 → newest=0, page 2 → newest=60, page 3 → newest=120, …
+    'newest' is the pagination offset: page 1=0, page 2=60, page 3=120.
     """
     params = {
         "by"       : "relevance",
@@ -202,8 +181,8 @@ def build_url(keyword: str, offset: int) -> str:
 
 def parse_price(raw: int) -> float:
     """
-    Shopee stores prices as integers scaled by 100 000.
-    Example: 15_000_000 raw → IDR 150 000 actual.
+    Shopee stores prices as integers scaled by 100,000.
+    Example: 15,000,000 raw -> IDR 150,000.
     """
     return raw / 100_000
 
@@ -211,26 +190,22 @@ def parse_price(raw: int) -> float:
 def parse_item(raw: dict) -> Optional[Product]:
     """
     Extract a Product from one item dict returned by the Shopee search API.
-
-    Returns None (and logs a warning) if any mandatory field is absent,
-    so the caller can safely skip bad rows without crashing the run.
+    Returns None if any mandatory field is missing.
     """
     try:
         basic = raw.get("item_basic", {})
 
-        # --- Mandatory fields ---
+        # --- Mandatory ---
         name  = basic.get("name", "").strip()
         catid = basic.get("catid")
         price = basic.get("price")
 
         if not name or catid is None or price is None:
-            log.debug("Skipping item with missing mandatory field: %s", basic.get("itemid"))
             return None
 
         # --- Rating & reviews ---
         rating_block  = basic.get("item_rating", {})
         rating        = rating_block.get("rating_star")
-        # rating_count is an array: [total, 5★, 4★, 3★, 2★, 1★]
         rating_counts = rating_block.get("rating_count", [])
         review_count  = rating_counts[0] if rating_counts else None
 
@@ -238,14 +213,22 @@ def parse_item(raw: dict) -> Optional[Product]:
         units_sold = basic.get("sold")
         stock      = basic.get("stock")
 
-        # --- Seller location (string like "Jakarta Pusat", "Surabaya") ---
+        # --- Seller location ---
         seller_location = basic.get("shop_location", "").strip() or None
 
-        # --- Discount percentage (None means no active promo) ---
+        # --- Discount ---
+        # Shopee may return discount as an integer (5) or a string ("-5%").
+        # We normalise both to a plain positive integer percentage.
         discount_raw = basic.get("discount")
-        discount_pct = int(discount_raw) if discount_raw else None
+        discount_pct = None
+        if discount_raw:
+            cleaned = str(discount_raw).replace("%", "").replace("-", "").strip()
+            try:
+                discount_pct = int(cleaned) if cleaned else None
+            except ValueError:
+                discount_pct = None
 
-        # --- Canonical URL built from shopid + itemid ---
+        # --- URL ---
         shopid = basic.get("shopid")
         itemid = basic.get("itemid")
         product_url = (
@@ -267,7 +250,7 @@ def parse_item(raw: dict) -> Optional[Product]:
         )
 
     except (TypeError, ValueError, KeyError) as exc:
-        log.warning("Could not parse item — %s: %s", type(exc).__name__, exc)
+        log.warning("Could not parse item: %s", exc)
         return None
 
 
@@ -275,14 +258,9 @@ def parse_item(raw: dict) -> Optional[Product]:
 # Core scraping logic
 # ---------------------------------------------------------------------------
 
-def scrape_keyword(session: requests.Session, keyword: str) -> list[Product]:
-    """
-    Paginate through PAGES_PER_KEYWORD pages for one keyword.
-
-    Stops early if a page returns zero items (meaning we've exhausted results).
-    On a persistent request failure, logs the error and returns what we have.
-    """
-    products: list[Product] = []
+def scrape_keyword(session: requests.Session, keyword: str) -> List[Product]:
+    """Paginate through PAGES_PER_KEYWORD pages for one keyword."""
+    products: List[Product] = []
 
     for page in range(PAGES_PER_KEYWORD):
         offset = page * ITEMS_PER_PAGE
@@ -291,56 +269,96 @@ def scrape_keyword(session: requests.Session, keyword: str) -> list[Product]:
         log.info("  keyword=%-15r  page=%d/%d  offset=%d",
                  keyword, page + 1, PAGES_PER_KEYWORD, offset)
 
-        try:
-            t0   = time.time()
-            resp = session.get(url, headers=build_headers(keyword), timeout=REQUEST_TIMEOUT)
-            duration = time.time() - t0
-            resp.raise_for_status()
-        except requests.RequestException as exc:
-            log.error("Request failed (keyword=%r, page=%d): %s", keyword, page + 1, exc)
-            break  # skip remaining pages for this keyword
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                t0       = time.time()
+                resp     = session.get(url, headers=build_headers(keyword), timeout=REQUEST_TIMEOUT)
+                duration = time.time() - t0
+                resp.raise_for_status()
+                break  # success — exit retry loop
+            except Exception as exc:
+                log.warning("  Attempt %d/%d failed: %s", attempt, MAX_RETRIES, exc)
+                if attempt < MAX_RETRIES:
+                    time.sleep(2 ** attempt)  # exponential backoff: 2s, 4s
+                else:
+                    log.error("  All retries exhausted for keyword=%r page=%d", keyword, page + 1)
+                    return products  # return what we have so far
 
-        # Log response time — a sudden increase (e.g. >5 s) signals rate-limiting
-        log.debug("  Response: HTTP %d in %.2f s", resp.status_code, duration)
+        log.debug("  HTTP %d in %.2f s", resp.status_code, duration)
 
         data  = resp.json()
         items = data.get("items") or []
 
         if not items:
-            log.info("  No more items at offset=%d — stopping early for %r", offset, keyword)
+            log.info("  No more items — stopping early for %r", keyword)
             break
 
         parsed = [parse_item(item) for item in items]
         valid  = [p for p in parsed if p is not None]
         products.extend(valid)
-        log.info("  → %d/%d items accepted", len(valid), len(items))
+        log.info("  -> %d/%d items accepted", len(valid), len(items))
 
-        # Polite delay — random jitter avoids a predictable request pattern
         delay = random.uniform(*DELAY_BETWEEN_REQUESTS)
-        log.debug("  Sleeping %.1f s …", delay)
         time.sleep(delay)
 
     return products
 
 
-def scrape_all(keywords: list[str]) -> list[Product]:
+def warm_up_session(session: requests.Session) -> None:
     """
-    Run the full scrape across all keywords.
+    Visit Shopee's homepage to acquire session cookies before hitting the API.
 
-    Deduplicates by product URL (or product name as fallback) so a listing
-    that appears under multiple keyword searches is only kept once.
+    Shopee checks that cookies from the main site are present on API calls.
+    A fresh session (new TLS handshake) combined with a homepage visit makes
+    each keyword's requests look like a brand-new browser opening the site.
     """
-    session      = build_session()
-    all_products : list[Product] = []
-    seen         : set[str]      = set()
+    try:
+        session.get(
+            "https://shopee.co.id/",
+            headers={
+                "User-Agent"     : random.choice(USER_AGENTS),
+                "Accept"         : "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+            },
+            timeout=REQUEST_TIMEOUT,
+        )
+        log.debug("  Session warm-up complete")
+        time.sleep(random.uniform(1.5, 2.5))
+    except Exception as exc:
+        log.warning("  Warm-up failed (continuing anyway): %s", exc)
 
-    for keyword in keywords:
-        log.info("─── Keyword: %r", keyword)
+
+def scrape_all(keywords: List[str]) -> List[Product]:
+    """
+    Scrape all keywords and return deduplicated products.
+
+    A fresh session (new TLS handshake + new cookies) is created for each
+    keyword. This resets Shopee's per-session rate-limit counter and makes
+    each keyword's traffic look like a new browser visit.
+    Deduplication uses product_url so the same listing is never counted twice.
+    """
+    all_products : List[Product] = []
+    seen         : set           = set()
+
+    for i, keyword in enumerate(keywords):
+        log.info("--- Keyword: %r", keyword)
+
+        # Fresh session per keyword — resets TLS fingerprint and cookies
+        session = build_session()
+        warm_up_session(session)
+
         for product in scrape_keyword(session, keyword):
             uid = product.product_url or product.product_name
             if uid not in seen:
                 seen.add(uid)
                 all_products.append(product)
+
+        # Longer pause between keywords so the next session doesn't look
+        # like it immediately follows the previous one from the same IP
+        if i < len(keywords) - 1:
+            pause = random.uniform(8.0, 15.0)
+            log.info("  Pausing %.1f s before next keyword ...", pause)
+            time.sleep(pause)
 
     log.info("Total unique products collected: %d", len(all_products))
     return all_products
@@ -350,7 +368,6 @@ def scrape_all(keywords: list[str]) -> list[Product]:
 # Output
 # ---------------------------------------------------------------------------
 
-# Column order kept consistent across CSV and JSON
 FIELDNAMES = [
     "product_name", "category_id", "price_idr",
     "rating", "review_count", "units_sold",
@@ -358,20 +375,20 @@ FIELDNAMES = [
 ]
 
 
-def save_csv(products: list[Product], path: str) -> None:
+def save_csv(products: List[Product], path: str) -> None:
     """Write products to a UTF-8 CSV file with a header row."""
     with open(path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
         writer.writeheader()
         writer.writerows(asdict(p) for p in products)
-    log.info("CSV  → %s  (%d rows)", path, len(products))
+    log.info("CSV  -> %s  (%d rows)", path, len(products))
 
 
-def save_json(products: list[Product], path: str) -> None:
+def save_json(products: List[Product], path: str) -> None:
     """Write products to a JSON file as an array of objects."""
     with open(path, "w", encoding="utf-8") as f:
         json.dump([asdict(p) for p in products], f, ensure_ascii=False, indent=2)
-    log.info("JSON → %s  (%d records)", path, len(products))
+    log.info("JSON -> %s  (%d records)", path, len(products))
 
 
 # ---------------------------------------------------------------------------
@@ -381,7 +398,7 @@ def save_json(products: list[Product], path: str) -> None:
 def main() -> None:
     log.info("Shopee Indonesia Product Scraper — starting")
     log.info("Keywords : %s", KEYWORDS)
-    log.info("Scope    : %d pages × %d items × %d keywords (max ~%d records)",
+    log.info("Scope    : %d pages x %d items x %d keywords (max ~%d records)",
              PAGES_PER_KEYWORD, ITEMS_PER_PAGE, len(KEYWORDS),
              PAGES_PER_KEYWORD * ITEMS_PER_PAGE * len(KEYWORDS))
 

@@ -1,21 +1,38 @@
 product_name,category_id,price_idr,rating,review_count,units_sold,stock,seller_location,discount_pct,product_url
-"ASUS VivoBook 15 A516 Core i5-1135G7 8GB 512GB SSD Win11 OHS 15.6"" FHD",11044,7299000.0,4.88,2341,876,45,Jakarta Pusat,15,https://shopee.co.id/product/123456789/987654321
-"Lenovo IdeaPad Slim 3 Ryzen 5 5500U 8GB 512GB SSD OHS 2021 15.6"" FHD",11044,6999000.0,4.91,1876,1204,12,Surabaya,,https://shopee.co.id/product/234567890/876543210
-"HP 14s-dq5xxx Intel Core i3-1215U 8GB 256GB SSD Windows 11 14"" FHD",11044,5899000.0,4.82,987,432,89,Bandung,10,https://shopee.co.id/product/345678901/765432109
-"ACER Aspire 3 A314 AMD Ryzen 3 5300U 8GB 512GB SSD Windows 11",11044,5499000.0,4.79,1543,2100,7,Jakarta Barat,20,https://shopee.co.id/product/456789012/654321098
-"Samsung Galaxy A55 5G 8/256GB Garansi Resmi SEIN",11269,4999000.0,4.95,5621,3482,200,Jakarta Pusat,5,https://shopee.co.id/product/567890123/543210987
-"Xiaomi Redmi Note 13 Pro 5G 8/256GB Snapdragon 7s Gen 2 NFC",11269,3399000.0,4.87,8934,12650,500,Surabaya,12,https://shopee.co.id/product/678901234/432109876
-"OPPO A98 5G 8/256GB AMOLED 120Hz Snapdragon 695 Garansi Resmi",11269,3199000.0,4.76,3201,4300,156,Medan,8,https://shopee.co.id/product/789012345/321098765
-"realme C67 6/128GB Snapdragon 685 108MP Camera Garansi Resmi",11269,1899000.0,4.81,6732,9870,780,Jakarta Timur,,https://shopee.co.id/product/890123456/210987654
-"Sepatu Sneakers Pria Casual Nike Airmax Ori BNIB Size 39-44",11220,459000.0,4.71,432,867,120,Bandung,30,https://shopee.co.id/product/901234567/109876543
-"Sepatu Olahraga Running Pria Wanita Sport Gym Jogging Anti-Slip",11220,189000.0,4.63,1289,4320,300,Surabaya,25,https://shopee.co.id/product/112345678/098765432
-"ADIDAS Ultraboost Light Sepatu Lari Pria Original Garansi Resmi",11220,2299000.0,4.93,876,342,34,Jakarta Selatan,,https://shopee.co.id/product/223456789/987654320
-"Sepatu Boots Pria Kulit Sintetis High Ankle Safety Boot Premium",11220,349000.0,4.68,567,1230,89,Yogyakarta,20,https://shopee.co.id/product/334567890/876543209
-"Somethinc Niacinamide + Moisture Beet Serum 20ml Brightening",11225,82000.0,4.94,12340,45600,1500,Jakarta Selatan,15,https://shopee.co.id/product/445678901/765432108
-"Wardah Lightening Series Serum Vitamin C 30ml Original BPOM",11225,67000.0,4.81,8921,38900,2300,Surabaya,,https://shopee.co.id/product/556789012/654321097
-"COSRX Advanced Snail 96 Mucin Power Essence 100ml",11225,189000.0,4.96,23450,87600,890,Jakarta Pusat,10,https://shopee.co.id/product/667890123/543210986
-"Emina Sun Protection SPF 30 PA+++ 30ml Sunscreen Wajah",11225,45000.0,4.77,4321,28900,3200,Bandung,5,https://shopee.co.id/product/778901234/432109875
-"Baju Kaos Polos Pria Premium Cotton Combed 30s Lengan Pendek",11216,39000.0,4.72,18930,89400,5000,Solo,15,https://shopee.co.id/product/889012345/321098764
-"Kemeja Pria Lengan Panjang Slim Fit Formal Casual Office Style",11216,129000.0,4.69,7832,34200,1200,Jakarta Barat,20,https://shopee.co.id/product/990123456/210987653
-"Jaket Bomber Pria Korean Style Hoodie Zipper Waterproof Premium",11216,199000.0,4.74,5621,21300,450,Bandung,25,https://shopee.co.id/product/101234567/109876542
-"Celana Jogger Pria Bahan Fleece Tebal Anti Dingin Casual Sport",11216,115000.0,4.67,9234,56700,2100,Surabaya,10,https://shopee.co.id/product/212345678/098765431
+hot deals sandal baim wedges anak perempuan terbaru kekinian sandal baim tali belakang karakter boneka,100633,161900.0,,0,,,Jakarta Pusat,,https://shopee.co.id/product/1732324109/48861078286
+sepatu vans putih kotak” size 38,100012,650000.0,,0,,,Jakarta Timur,,https://shopee.co.id/product/500776777/53911033739
+Sandal Anti Slip,100012,30000.0,,0,,,Makassar,,https://shopee.co.id/product/206702608/56011024607
+BEST SALE Sepatu Loafers Pria Premium Slip On Formal Casual Anti Slip WalkStar,100012,350000.0,,0,,,Bandar Lampung,,https://shopee.co.id/product/1534490997/48361060829
+Preloved sepatu olahraga wanita,100637,590000.0,,0,,,Jakarta Timur,,https://shopee.co.id/product/1466947908/51161033404
+Paket 4 Sepatu Futsal Ortuseight Legion Catalyts Bima Sol Tebal Dan Nyaman Grade Original Berkualitas,100636,277000.0,,0,,,Denpasar,,https://shopee.co.id/product/1684680382/41181128873
+Damelia Melstore Jkt Kay Loafers Wanita Sepatu Oxford Style Korea Anti Licin Nyaman Sepatu Kerja Formal Casual,100636,538000.0,,0,,,Denpasar,,https://shopee.co.id/product/1680872527/26094925314
+Fsb - Rukoyah Sepatu Loafer Wanita,100636,214000.0,,0,,,Kab. Buleleng,,https://shopee.co.id/product/1684647528/55961022240
+Sandal wanita kekinian big size 37+45,100532,150000.0,,0,,,Kab. Bogor,,https://shopee.co.id/product/1530297526/53411016345
+Tas Running BFI Run 2026 by Brooks,100637,40000.0,,0,,,Tangerang Selatan,,https://shopee.co.id/product/1540243342/46111029866
+Rak Sepatu Kayu Solid Minimalis Organizer Serbaguna Indoor Outdoor Estetik Tahan Lama Susun,100636,552000.0,,0,,,Depok,,https://shopee.co.id/product/1815397464/40531127631
+LAWRENSIA‼️sepatu wanita sneakers ori,100532,365900.0,,0,,,Surabaya,,https://shopee.co.id/product/652755792/49411023964
+AP BOOTS TERRA ECO 5 SEPATU BOOT HUJAN SIZE 25 - 28 ( 37 - 44 ) HIJAU SETENGAH BETIS DEWASA,100636,145000.0,,0,,,Kab. Malang,,https://shopee.co.id/product/1825339458/52810999965
+AP BOOTS SAFETY S4 SIZE 39 - 43 - SEPATU AP BOOTS SAFETY S4 - AP BOOTS TOE CAP BESI,100636,362000.0,,0,,,Kab. Malang,,https://shopee.co.id/product/1825339458/40081129465
+(Choiz) 3/5/6 Pcs Jemuran Kaos Kaki Tas Serbaguna / Jemuran Sepatu Gantung / Shoes Drying Rack,100636,182000.0,,0,,,Bekasi,,https://shopee.co.id/product/1809381595/55911011622
+PROMO TERBARU Alat Mesin Pengering Sepatu Elektrik 200W 220V Shoe Dryer Dengan Timer Knob,100010,224100.0,,0,,,Denpasar,,https://shopee.co.id/product/1763791520/52010998682
+TOMKINS Andrea  - Putih Biru Sepatu Wanita,100532,210800.0,,0,,,Jakarta Barat,,https://shopee.co.id/product/270566523/47961023665
+"Sepatu Datar Jala Gesper Logam untuk Wanita, Sepatu Balet Mary Jane, Sepatu Jaring Ikan Modis",100532,556954.0,,0,,,Tangerang,,https://shopee.co.id/product/1833834942/45511022465
+Cortez Leather Women s Sail/Khaki/White/Cacao Wow,100532,3250650.0,,0,,,Tangerang,,https://shopee.co.id/product/1833834942/25848189128
+"Sepatu yang nyaman dengan sol yang lembut, sepatu kulit yang lembut, sepatu kulit tunggal, sepatu wanita bertumit rendah, sepatu kulit kecil",100532,530941.0,,0,,,Tangerang,,https://shopee.co.id/product/1833834942/46461023576
+Sepatu wanita slip-ins 125642/Original,100532,552000.0,,0,,,Kab. Bekasi,,https://shopee.co.id/product/11657131/54961006892
+You Nine - Flat Shoes Minimalis Heels Slip On Wanita 210 YNA00701,100532,344300.0,,0,,,Tangerang,,https://shopee.co.id/product/1833834942/46411026744
+VIVI NICI - Rawles Sandal Mules Hak 5 cm Shoes Wanita Sendal wanita heels wanita sepatu kondangan Pesta LM,100637,802000.0,,0,,,Semarang,,https://shopee.co.id/product/216599895/47411018194
+Cutegirls- Sandal Heels Hak Kaca Tinggi 7 Cm Terbaru. Aluna Collection. Wk 141 Realpick Nita Sendal,100532,109900.0,,0,,,Bandung,,https://shopee.co.id/product/1709196832/49961023232
+READY LOSTARS (TANPA INSTALASI) 2-7 SUSUN ACRYLIC RAK SEPATU SUSUN BISA LIPAT RAK KABINET SUSUN,100636,923000.0,,0,,,Jakarta Timur,,https://shopee.co.id/product/1810082997/48061031511
+Sistas Aruna Heels Pesta 3cm Diamond Cocok Untuk Kondangan LM,100532,324000.0,,0,,,Semarang,,https://shopee.co.id/product/216599895/43331114194
+Sepatu Astec Metron Running Navy Size 41 Original Sale SportStation,100637,250000.0,,0,,,Kab. Jember,,https://shopee.co.id/product/101390348/55760996915
+Sepatu Bot Laki-laki Motif Jangkar Terbaru 2025,100012,56000.0,,0,,,Jakarta Selatan,,https://shopee.co.id/product/1520935299/47911016906
+SEPATU SEPAK BOLA SPEED SEPATU BOLA DEWASA,100637,286000.0,,0,,,Jakarta Selatan,,https://shopee.co.id/product/1832677301/53510994172
+DISKON Safety Shoes 7106H Hitam READY STOCK,100636,690000.0,,0,,,Semarang,,https://shopee.co.id/product/1694085845/50610994138
+Sepatu Bola Anak Kaos Kaki Bahan Exselon Kualitas Sablon Embos Ausul Tipiu Ukuran 33_37,100637,186000.0,,0,,,Jakarta Selatan,,https://shopee.co.id/product/1832677301/57360994203
+KNALPOT CRF 250 CRF250 FULLSYSTEM/SLIP ON,100641,23920000.0,,0,,,Jakarta Selatan,,https://shopee.co.id/product/1798637736/26794888178
+Jibz & Bitz - Hiasan Sepatu Sandal 1 Set Faceted Diamond Surface Kanan Kiri Side Charm Tampilan,100636,53000.0,,0,,,Makassar,,https://shopee.co.id/product/1808457665/45311014036
+Leedoo Sepatu Pria Sneakers Casual Fashion Terbaru Sport Running Shoes MR109,100012,180822.0,,0,,,Jakarta Pusat,,https://shopee.co.id/product/1675930936/42831113693
+Froomzero - Sepatu Sneakers Pria Wanita Casual Sport Olahraga Lari Dan Jogging Sepatu Olahraga,100637,311000.0,,0,,,Bekasi,,https://shopee.co.id/product/1171197349/50360999035
+SIAPKIRIM Safety Shoes Kings KWD 301X Honeywell READY STOCK,100636,793000.0,,0,,,Semarang,,https://shopee.co.id/product/1694085845/29694892925
+PROMO Sepatu Saganext Running Cygnus Pro,100636,278000.0,,0,,,Surabaya,,https://shopee.co.id/product/1809354391/50010993915
