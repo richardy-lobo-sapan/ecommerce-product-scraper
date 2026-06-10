@@ -2,7 +2,7 @@
 # scraper.py — Shopee Indonesia Product Scraper
 # =============================================================================
 # Author  : Richardy Lobo Sapan
-# Project : DE Analytics Portfolio — Section 3 (Kredivo Technical Test)
+# Project : DE Analytics Portfolio — Section 3
 # Target  : Shopee Indonesia (https://shopee.co.id)
 # Output  : result.csv and result.json
 # =============================================================================
