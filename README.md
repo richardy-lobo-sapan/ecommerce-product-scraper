@@ -1,6 +1,6 @@
 # Shopee Indonesia Product Scraper
  
-A Python scraper targeting Shopee Indonesia (`shopee.co.id`), built as Section 3 of the DE Analytics Portfolio (Kredivo Technical Test).
+A Python scraper targeting Shopee Indonesia (`shopee.co.id`), built as Section 3 of the DE Analytics Portfolio.
  
 **Status: Partial success.** The scraper is fully functional and successfully collected real product data. Collection was limited by Shopee's multi-layered anti-bot system, documented in full below. `result.csv` and `result.json` contain a combination of real scraped rows and representative sample data demonstrating the full schema.
  
